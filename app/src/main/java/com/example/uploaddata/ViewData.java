@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Spinner;
 
 import com.google.firebase.database.DataSnapshot;
@@ -27,7 +29,7 @@ public class ViewData extends AppCompatActivity {
     String Database_Path = "All_Image_Uploads_Database";
     private ArrayList<ImageUploadInfo> uploads =new ArrayList<>();
     Spinner spinner;
-
+    public  static String spinnerValue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,8 +43,6 @@ public class ViewData extends AppCompatActivity {
 
         databaseReference= FirebaseDatabase.getInstance().getReference(Database_Path);
 
-        String spinnerValue=spinner.getSelectedItem().toString();
-        
         //Get Data From FireBase
         getDataFromFireBase();
     }
