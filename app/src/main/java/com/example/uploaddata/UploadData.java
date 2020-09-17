@@ -135,6 +135,9 @@ public class UploadData extends AppCompatActivity {
                 try {
                     FilePathUri=result.getUri();
                     bitmap = compressImage(MediaStore.Images.Media.getBitmap(getContentResolver(), FilePathUri));
+                    System.out.println("-------------------BEFORE "+bitmap);
+                    bitmap=ImageResizer.reduceBitmapSize(bitmap,360000);
+                    System.out.println("-------------------BEFORE "+bitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -168,12 +171,13 @@ public class UploadData extends AppCompatActivity {
                 .start(this);
     }
 
-    public static Bitmap compressImage(Bitmap image) {
+    public Bitmap compressImage(Bitmap image) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 30, baos);// 100baos
+        image.compress(Bitmap.CompressFormat.JPEG, 20, baos);// 100baos
         int options = 100;
-        while (baos.toByteArray().length / 1024 > 100) { // 100kb,
+        while (baos.toByteArray().length / 1024 > 300) { // 300kb,
             baos.reset();// baosbaos
+            System.out.println("#########$$$$$$$$$$$$$$###"+baos.toByteArray().length+"  "+baos.toByteArray().length / 1024);
             image.compress(Bitmap.CompressFormat.JPEG, options, baos);// options%baos
             options -= 10;// 10
         }

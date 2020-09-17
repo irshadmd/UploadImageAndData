@@ -27,36 +27,58 @@ public class ViewData extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private RecyclerView.Adapter recyclerAdapter;
     String Database_Path = "All_Image_Uploads_Database";
-    private ArrayList<ImageUploadInfo> uploads =new ArrayList<>();
+    private ArrayList<ImageUploadInfo> uploads = new ArrayList<>();
     Spinner spinner;
-    public  static String spinnerValue;
+    public String spinnerValue;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_data);
-        spinner=findViewById(R.id.filterType);
-        recyclerView=findViewById(R.id.recyclerView);
+        spinner = findViewById(R.id.filterType);
+        recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
 
-        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(ViewData.this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ViewData.this);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        databaseReference= FirebaseDatabase.getInstance().getReference(Database_Path);
+        databaseReference = FirebaseDatabase.getInstance().getReference(Database_Path);
 
+        spinnerValue = spinner.getSelectedItem().toString();
         //Get Data From FireBase
-        getDataFromFireBase();
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                spinnerValue = spinner.getSelectedItem().toString();
+                getDataFromFireBase(spinnerValue);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        getDataFromFireBase(spinnerValue);
     }
-    private void getDataFromFireBase(){
+
+    private void getDataFromFireBase(final String spinVal) {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 clearAll();
-                for(DataSnapshot snapshot:dataSnapshot.getChildren()){
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     ImageUploadInfo imageUploadInfo = snapshot.getValue(ImageUploadInfo.class);
-                    uploads.add(imageUploadInfo);
+                    if (spinVal.equals("All Animals")) {
+                        uploads.add(imageUploadInfo);
+                    }
+                    if (spinVal.equals(imageUploadInfo.getAnimalType())) {
+                        uploads.add(imageUploadInfo);
+                    }
+                    System.out.println(spinVal + "    checking    " + imageUploadInfo.getAnimalType().toString());
                 }
-                recyclerAdapter=new RecyclerAdapter(getApplicationContext(),uploads);
+                recyclerAdapter = new RecyclerAdapter(getApplicationContext(), uploads);
                 recyclerView.setAdapter(recyclerAdapter);
+                recyclerAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -65,10 +87,11 @@ public class ViewData extends AppCompatActivity {
             }
         });
     }
-    private void clearAll(){
-        if(uploads!=null){
+
+    private void clearAll() {
+        if (uploads != null) {
             uploads.clear();
         }
-        uploads=new ArrayList<>();
+        uploads = new ArrayList<>();
     }
 }

@@ -5,4 +5,10 @@
         <item>Pet</item>
         <item>Wild</item>
     </string-array>
+
+    <string-array name="typelist">
+        <item>All Animals</item>
+        <item>Pet</item>
+        <item>Wild</item>
+    </string-array>
 </resources>
