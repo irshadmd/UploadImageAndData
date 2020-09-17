@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.anstrontechnologies.corehelper.AnstronCoreHelper;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -30,11 +31,14 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.iceteck.silicompressorr.FileUtils;
+import com.iceteck.silicompressorr.SiliCompressor;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 import androidx.annotation.NonNull;
@@ -55,6 +59,7 @@ public class UploadData extends AppCompatActivity {
 
     // Creating URI.
     Uri FilePathUri,croppedUri;
+    AnstronCoreHelper anstronCoreHelper;
 
 
     // Creating StorageReference and DatabaseReference object.
@@ -75,6 +80,8 @@ public class UploadData extends AppCompatActivity {
 
         // Assign FirebaseDatabase instance with root database name.
         databaseReference = FirebaseDatabase.getInstance().getReference(Database_Path);
+
+        anstronCoreHelper=new AnstronCoreHelper(this);
 
         ChooseButton = (Button) findViewById(R.id.chooseImage);
         UploadButton = (Button) findViewById(R.id.uploadbt);
@@ -135,9 +142,6 @@ public class UploadData extends AppCompatActivity {
                 try {
                     FilePathUri=result.getUri();
                     bitmap = compressImage(MediaStore.Images.Media.getBitmap(getContentResolver(), FilePathUri));
-                    System.out.println("-------------------BEFORE "+bitmap);
-                    bitmap=ImageResizer.reduceBitmapSize(bitmap,360000);
-                    System.out.println("-------------------BEFORE "+bitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -173,11 +177,10 @@ public class UploadData extends AppCompatActivity {
 
     public Bitmap compressImage(Bitmap image) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 20, baos);// 100baos
-        int options = 100;
+        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);// 100baos
+        int options = 90;
         while (baos.toByteArray().length / 1024 > 300) { // 300kb,
             baos.reset();// baosbaos
-            System.out.println("#########$$$$$$$$$$$$$$###"+baos.toByteArray().length+"  "+baos.toByteArray().length / 1024);
             image.compress(Bitmap.CompressFormat.JPEG, options, baos);// options%baos
             options -= 10;// 10
         }
@@ -232,6 +235,10 @@ public class UploadData extends AppCompatActivity {
         if (FilePathUri != null) {
             progressDialog.setTitle("Uploading...");
             progressDialog.show();
+
+            File file=new File(SiliCompressor.with(this).compress(FileUtils.getPath(this,FilePathUri),new File(this.getCacheDir(),"temp")));
+            Uri uri=Uri.fromFile(file);
+            FilePathUri=uri;
 
             // Creating second StorageReference.
             StorageReference storageReference2nd = storageReference.child(Storage_Path + System.currentTimeMillis() + "." + GetFileExtension(FilePathUri));
